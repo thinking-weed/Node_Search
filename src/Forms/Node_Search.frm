@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} Node_Search 
    Caption         =   "Node_Search"
-   ClientHeight    =   10440
+   ClientHeight    =   11436
    ClientLeft      =   108
    ClientTop       =   456
-   ClientWidth     =   13788
+   ClientWidth     =   14784
    OleObjectBlob   =   "Node_Search.frx":0000
    StartUpPosition =   1  'オーナー フォームの中央
 End
@@ -14,6 +14,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+
 
 
 
@@ -132,9 +133,15 @@ Private Sub AllFilterClear_button_Click()
         Me.検索候補ファイル
 End Sub
 
-Private Sub Close_button_Click()
-    'フォームを閉じる
-    Unload Me
+
+'キーワードを使って一括絞り込み選択
+Private Sub Keyword_Filter_button_Click()
+
+    MoveKeywordItems _
+        Me.検索候補ファイル, _
+        Me.検索実行ファイル, _
+        Trim(Me.Keyword.Text)
+
 End Sub
 
 
@@ -366,6 +373,49 @@ Private Sub MoveAllItems( _
 End Sub
 
 
+'=========================================
+' キーワードに一致する項目を移動
+'=========================================
+Private Sub MoveKeywordItems( _
+    sourceList As MSForms.ListBox, _
+    targetList As MSForms.ListBox, _
+    Keyword As String)
+
+    Dim remainFiles As Collection
+    Dim item As Variant
+    Dim i As Long
+
+    Set remainFiles = New Collection
+
+    'キーワード未入力
+    If Keyword = "" Then
+        MsgBox "キーワードを入力してください。", vbExclamation
+        Exit Sub
+    End If
+
+    For i = 0 To sourceList.ListCount - 1
+
+        If InStr(1, sourceList.List(i), Keyword, vbTextCompare) > 0 Then
+
+            If Not ExistsInListBox(targetList, sourceList.List(i)) Then
+                targetList.AddItem sourceList.List(i)
+            End If
+
+        Else
+
+            remainFiles.Add sourceList.List(i)
+
+        End If
+
+    Next i
+
+    sourceList.Clear
+
+    For Each item In remainFiles
+        sourceList.AddItem item
+    Next item
+
+End Sub
 
 
 
